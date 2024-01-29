@@ -25,26 +25,26 @@ async function main() {
   // const Token = await TokenFactory.deploy();
 
   // INTERACT WITH EXISTING CONTRACT
-  const abi = await getAbi();
-  const TokenContract = new ethers.ContractFactory(
-    TOKEN_CONTRACT_ADDRESS,
-    abi,
-    wallet
-  );
+  // const abi = await getAbi();
+  // const TokenContract = new ethers.ContractFactory(
+  //   TOKEN_CONTRACT_ADDRESS,
+  //   abi,
+  //   wallet
+  // );
 
   // grantRole takes 2 args: role(bytes32), account(address)
-  const grantRoleTx = await TokenContract.grantRole(
-    ethers.encodeBytes32String("MINTER_ROLE"),
-    TOKENSHOP_CONTRACT_ADDRESS
-  );
-  const grantRoleTxReceipt = await grantRoleTx.wait();
-  console.log("grantRoleTxReceipt", grantRoleTxReceipt);
+  // const grantRoleTx = await TokenContract.grantRole(
+  //   ethers.encodeBytes32String("MINTER_ROLE"),
+  //   TOKENSHOP_CONTRACT_ADDRESS
+  // );
+  // const grantRoleTxReceipt = await grantRoleTx.wait();
+  // console.log("grantRoleTxReceipt", grantRoleTxReceipt);
 
-  // const tx = await wallet.sendTransaction({
-  //   to: "0x9B74F89b6DBE2519aC66CA611CB3a9bBD638B689",
-  //   value: ethers.utils.parseUnits("0.001", "ether"),
-  // });
-  // console.log(tx);
+  const tx = await wallet.sendTransaction({
+    to: TOKENSHOP_CONTRACT_ADDRESS,
+    value: ethers.utils.parseUnits("0.001", "ether"),
+  });
+  console.log(tx);
 }
 
 main()
