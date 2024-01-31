@@ -1,17 +1,12 @@
 import { ethers } from "ethers";
 import * as dotenv from "dotenv";
 dotenv.config();
-import { promises as fsPromises } from "fs";
-
-const TOKEN_CONTRACT_ADDRESS = "0x4717B57d1d73bb50c5dE780abE0a11876e60Bd6A";
-const TOKENSHOP_CONTRACT_ADDRESS = "0x9B74F89b6DBE2519aC66CA611CB3a9bBD638B689";
-const ABI_FILE_PATH = "../artifacts/contracts/Token.sol/Token.json";
-
-async function getAbi() {
-  const data = await fsPromises.readFile(ABI_FILE_PATH, "utf8");
-  const abi = JSON.parse(data)["abi"];
-  return abi;
-}
+import {
+  Token,
+  Token__factory,
+  TokenShop,
+  TokenShop__factory,
+} from "../typechain-types";
 
 async function main() {
   // CONFIGURE PROVIDER & WALLET
@@ -19,32 +14,54 @@ async function main() {
     process.env.RPC_ENDPOINT_URL ?? ""
   );
   const wallet = new ethers.Wallet(process.env.PRIVATE_KEY ?? "", provider);
+  const TokenFactory = new Token__factory(wallet);
+  const TokenShopFactory = new TokenShop__factory(wallet);
 
-  // DEPLOY CONTRACT
-  // const TokenFactory = await hre.ethers.getContractFactory("Token");
-  // const Token = await TokenFactory.deploy();
+  // DEPLOY TOKEN CONTRACT
+  const TokenContract = await TokenFactory.deploy();
+  await TokenContract.waitForDeployment();
+  const myTokenAddress = await TokenContract.getAddress();
+  console.log("myTokenAddress", myTokenAddress);
 
-  // INTERACT WITH EXISTING CONTRACT
-  // const abi = await getAbi();
-  // const TokenContract = new ethers.ContractFactory(
-  //   TOKEN_CONTRACT_ADDRESS,
-  //   abi,
-  //   wallet
-  // );
+  // DEPLOY TOKENSHOP CONTRACT
+  const TokenShopContract = await TokenShopFactory.deploy(myTokenAddress);
+  await TokenShopContract.waitForDeployment();
+  const myTokenShopAddress = await TokenShopContract.getAddress();
+  console.log("myTokenShopAddress", myTokenShopAddress);
 
-  // grantRole takes 2 args: role(bytes32), account(address)
-  // const grantRoleTx = await TokenContract.grantRole(
-  //   ethers.encodeBytes32String("MINTER_ROLE"),
-  //   TOKENSHOP_CONTRACT_ADDRESS
-  // );
-  // const grantRoleTxReceipt = await grantRoleTx.wait();
-  // console.log("grantRoleTxReceipt", grantRoleTxReceipt);
+  // INTERACT WITH EXISTING CONTRACT (not needed here)
+  // const TokenContract = TokenFactory.attach(myTokenAddress) as Token;
 
+  // grantRole takes 2 args: role(kekkac the MINTER_ROLE string to get bytes32), account(address)
+  const grantRoleTx = await TokenContract.grantRole(
+    ethers.keccak256(ethers.toUtf8Bytes("MINTER_ROLE")),
+    myTokenShopAddress
+  );
+  const grantRoleTxReceipt = await grantRoleTx.wait();
+  console.log("grantRoleTxReceipt", grantRoleTxReceipt);
+
+  // ASK TOKEN CONTRACT WHO IS MINTER
+  const tokenShopHasRole = await TokenContract.hasRole(
+    ethers.keccak256(ethers.toUtf8Bytes("MINTER_ROLE")),
+    myTokenShopAddress
+  );
+  console.log("tokenShopHasRole", tokenShopHasRole);
+
+  // CHECK TOKEN BALANCE OF WALLET
+  const tokenBalance = await TokenContract.balanceOf(wallet.address);
+  console.log("tokenBalance", tokenBalance.toString());
+
+  // SEND ETH TO TOKENSHOP aka MINT NEW ERC20 TOKENS (RECEIVE FALLLBACK FUNCTION)
   const tx = await wallet.sendTransaction({
-    to: TOKENSHOP_CONTRACT_ADDRESS,
-    value: ethers.utils.parseUnits("0.001", "ether"),
+    to: myTokenShopAddress,
+    value: ethers.parseEther("0.001"),
   });
-  console.log(tx);
+  const txReceipt = await tx.wait();
+  console.log(txReceipt);
+
+  // CHECK TOKEN BALANCE OF WALLET
+  const tokenBalanceAfter = await TokenContract.balanceOf(wallet.address);
+  console.log("tokenBalance", tokenBalanceAfter.toString());
 }
 
 main()
