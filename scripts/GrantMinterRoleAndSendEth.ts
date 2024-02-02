@@ -8,6 +8,10 @@ import {
   TokenShop__factory,
 } from "../typechain-types";
 
+// Idea for future development: loop through all price feeds in Chainlink API
+// https://github.com/smartcontractkit/documentation/blob/main/src/features/data/chains.ts
+// https://reference-data-directory.vercel.app/feeds-ethereum-testnet-sepolia.json
+
 async function main() {
   // CONFIGURE PROVIDER & WALLET
   const provider = new ethers.JsonRpcProvider(
