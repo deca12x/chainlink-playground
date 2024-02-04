@@ -10,11 +10,13 @@
   "license": "ISC",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
-    "hardhat": "^2.19.4"
+    "@openzeppelin/contracts": "^4.9.5",
+    "hardhat": "^2.19.4",
+    "typescript": "^5.3.3"
   },
   "dependencies": {
     "@chainlink/contracts": "^0.8.0",
-    "@openzeppelin/contracts": "^5.0.1",
+    "@chainlink/contracts-ccip": "^1.2.1",
     "dotenv": "^16.4.1",
     "node-fs": "^0.1.7"
   }

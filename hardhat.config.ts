@@ -6,7 +6,7 @@ dotenv.config();
 const { RPC_ENDPOINT_URL, PRIVATE_KEY } = process.env;
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.21",
+  solidity: "0.8.19",
   networks: {
     sepolia: {
       url: RPC_ENDPOINT_URL,
